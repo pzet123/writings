@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:writings/Writing.dart';
 
 class writingViewing extends StatefulWidget {
@@ -12,32 +13,59 @@ class _writingViewingState extends State<writingViewing> {
     Writing writing = ModalRoute.of(context).settings.arguments;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Writing view"),
+        title: Text(writing.title,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 22,
+          color: Colors.grey[100],
+        ),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.blueGrey[700],
       ),
       body: Container(
-        color: Colors.blueGrey[900],
+        color: Colors.blueGrey[200],
         child: Column(
           children: [
-            SizedBox(height: 12,),
-            Text(
-                writing.title,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold
-            ),
-            ),
-            Divider(thickness: 2, height: 5,),
-            Text(writing.description),
-            Divider(thickness: 4, height: 10,),
-            SingleChildScrollView(
-              child: Text(
-                writing.text,
-                style: TextStyle(
-                  fontSize: 14,
+            Divider(thickness: 3, height: 5,),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: ListView(
+                  children: [
+                    Text(writing.description,
+                        maxLines: 3,
+                        style: TextStyle(
+                            fontSize: 18
+                        )),
+                    Divider(thickness: 2, height: 10,),
+                    Text(
+                    writing.text,
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                ]
                 ),
               ),
-            )
+            ),
+            Divider(thickness: 3, height: 5,),
+            Container(
+              color: Colors.blueGrey,
+              padding: EdgeInsets.symmetric(vertical: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(child:
+                  Text("Importace level: " + writing.importance,
+                  style: TextStyle(fontSize: 18),)),
+                  Divider(thickness: 2, color: Colors.white,),
+                  Center(child:
+                  Text(writing.dateOfWriting.toString().substring(0, 16),
+                      style: TextStyle(fontSize: 18))),
+                ],
+              ),
+            ),
           ],
         ),
       )
