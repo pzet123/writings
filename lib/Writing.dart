@@ -1,13 +1,15 @@
 
+import 'dart:collection';
+
 class Writing{
   String _title;
   String _description;
   String _text;
   DateTime _dateOfWriting;
   String _importance;
-  List<String> _tags;
+  Set _tags;
 
-  Writing(String title, String description, String text, DateTime dateOfWriting, String importance, tags){
+  Writing(String title, String description, String text, DateTime dateOfWriting, String importance, Set tags){
     this._title = title;
     this._description = description;
     this._text = text;
@@ -25,6 +27,8 @@ class Writing{
   String get title => _title;
 
   String get description => _description;
+
+  Set get tags => _tags;
 
 
 
