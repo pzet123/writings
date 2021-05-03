@@ -4,7 +4,7 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:writings/Writing.dart';
-
+import 'appBarTitle.dart';
 const String highestImportance = "Red pill";
 const String highImportance = "High";
 const String mediumImportance = "Medium";
@@ -13,7 +13,7 @@ const List folderImportanceAttributes = [[highestImportance, Colors.red], [highI
 
 List<Writing> writings = [Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), highImportance, {"default tag"}),
   Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n Yeah", DateTime.now(), highestImportance, {"default tag"}),
-  Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), mediumImportance, {"default tag"}),
+  Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), mediumImportance, {"default tag", "Willpower"}),
   Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), mediumImportance, {"default tag"}),
   Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), mediumImportance, {"default tag"}),
   Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), mediumImportance, {"default tag"}),
@@ -27,23 +27,37 @@ List<Writing> writings = [Writing("Beaver mentality", "A reflection on the minds
 
 
 
-class homeScreen extends StatelessWidget {
+class homeScreen extends StatefulWidget {
 
 
+  @override
+  _homeScreenState createState() => _homeScreenState();
+}
+
+class _homeScreenState extends State<homeScreen> {
   HashSet tags;
+
   Map writingImportanceMap;
   Map writingTagMap;
 
-  @override
-  Widget build(BuildContext context) {
+  List<Widget> importanceFolders;
+  List<Widget> tagFolders;
+
+  void update(){
     tags = getTags();
     writingImportanceMap = sortWritingsByImportance();
     writingTagMap = sortWritingsByTag(tags.toList());
-    List<Widget> importanceFolders = getImportanceFolders(writingImportanceMap, context);
-    List<Widget> tagFolders = getTagFolders(writingTagMap, context, tags);
+    importanceFolders = getImportanceFolders(writingImportanceMap, context);
+    tagFolders = getTagFolders(writingTagMap, context, tags);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print("Build called");
+    update();
     return Scaffold(
       appBar: AppBar(
-        title: Text("Home screen"),
+        title: AppBarTitle("home screen"),
         backgroundColor: Colors.blueGrey[700],
       ),
       body: Container(
@@ -67,7 +81,10 @@ class homeScreen extends StatelessWidget {
               flex: 2,
               child: RaisedButton.icon(
                   onPressed: () {
-                    Navigator.pushNamed(context, "/writingScreen", arguments: writings);
+                    setState(() {
+                      update();
+                    });
+                    Navigator.pushNamed(context, "/writingScreen", arguments: {"WritingsToDisplay":writings, "Writings":writings});
                     },
                   icon: Icon(Icons.format_align_left),
                   label: Text("All"),
@@ -79,11 +96,8 @@ class homeScreen extends StatelessWidget {
       ),
     );
   }
-
-
-
-
 }
+
 
 Map sortWritingsByImportance(){
   Map writingMap = new Map();
@@ -124,7 +138,6 @@ Map sortWritingsByTag(List<String> tags){
     for(Writing writing in writingTemp){
       if(writing.tags.contains(tag)) {
         writingTagList.add(writing);
-        //writingTemp.remove(writing);
       }
     }
     writingMap[tag] = writingTagList;
@@ -168,7 +181,7 @@ List<Widget> getImportanceFolders(Map writingImportanceMap, BuildContext context
     return GestureDetector(
       child: getFolderCard(importanceAttributes[0], importanceAttributes[1]),
       onTap: () {
-        Navigator.pushNamed(context, "/writingScreen", arguments: writingImportanceMap[importanceAttributes[0]]);
+        Navigator.pushNamed(context, "/writingScreen", arguments: {"WritingsToDisplay":writingImportanceMap[importanceAttributes[0]], "Writings":writings});
       },
     );
   }).toList();
@@ -180,7 +193,7 @@ List<Widget> getTagFolders(Map writingTagMap, BuildContext context, HashSet tags
     return GestureDetector(
       child: getFolderCard(tag, Colors.blueGrey[300]),
       onTap: (){
-        Navigator.pushNamed(context, "/writingScreen", arguments: writingTagMap[tag]);
+        Navigator.pushNamed(context, "/writingScreen", arguments: {"WritingsToDisplay":writingTagMap[tag], "Writings":writings});
       },
     );
   }).toList();

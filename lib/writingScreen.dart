@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:writings/Writing.dart';
+import 'appBarTitle.dart';
 
 
 class writingScreen extends StatefulWidget {
@@ -43,10 +44,12 @@ class _writingScreenState extends State<writingScreen> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    List<Writing> writings = ModalRoute.of(context).settings.arguments;
+    Map writingsMap = ModalRoute.of(context).settings.arguments;
+    List<Writing> writingsToDisplay = writingsMap["WritingsToDisplay"];
+    List<Writing> writings = writingsMap["Writings"];
     return Scaffold(
       appBar: AppBar(
-        title: Text("Writings"),
+        title: AppBarTitle("Writings"),
         backgroundColor: Colors.blueGrey[700],
         centerTitle: true,
       ),
@@ -54,13 +57,15 @@ class _writingScreenState extends State<writingScreen> with SingleTickerProvider
         color: Colors.blueGrey[900],
         child: Scrollbar(
           child: ListView(
-            children: getWritingsWidgets(writings),
+            children: getWritingsWidgets(writingsToDisplay),
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, "/writingCreation");
+          Navigator.pushNamed(context, "/writingCreation", arguments: writings);
+          writings.add(Writing("Test writing","Test","Test writing ..", DateTime.now(), "Red pill", {"Life events", "Friends"}));
+          //TODO: Make sure that new writings show up in importance and tag folders.
         },
         backgroundColor: Colors.blueGrey,
         child:
@@ -127,8 +132,7 @@ class _writingScreenState extends State<writingScreen> with SingleTickerProvider
       decoration: BoxDecoration(
           boxShadow: [BoxShadow(
             color: Colors.orange[600],
-            // Color.fromARGB(255, 239, 126, 22),
-            blurRadius: _breathingAnimation.value,
+            blurRadius: 4,
             spreadRadius: _breathingAnimation.value,
           )]
       ),

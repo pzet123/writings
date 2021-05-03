@@ -7,7 +7,6 @@ import 'writingScreen.dart';
 import 'package:writings/writingCreation.dart';
 import 'package:writings/writingViewing.dart';
 
-
 void main() => runApp(new MaterialApp(
   initialRoute: "/home",
   routes: {"/home": (context) => homeScreen(),
