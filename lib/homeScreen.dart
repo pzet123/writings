@@ -11,19 +11,26 @@ const String mediumImportance = "Medium";
 const String lowImportance = "Normal";
 const List folderImportanceAttributes = [[highestImportance, Colors.red], [highImportance, Color.fromARGB(255, 236, 239, 241)], [mediumImportance, Color.fromARGB(255, 207, 216, 220)], [lowImportance, Color.fromARGB(255, 176, 190, 197)]];
 
-List<Writing> writings = [Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), highImportance, {"default tag"}),
-  Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n Yeah", DateTime.now(), highestImportance, {"default tag"}),
-  Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), mediumImportance, {"default tag", "Willpower"}),
-  Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), mediumImportance, {"default tag"}),
-  Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), mediumImportance, {"default tag"}),
-  Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), mediumImportance, {"default tag"}),
-  Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), lowImportance, {"default tag"}),
-  Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), mediumImportance, {"default tag"}),
-  Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), mediumImportance, {"default tag"}),
-  Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), mediumImportance, {"default tag"}),
-  Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), highImportance, {"default tag"}),
-  Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), highestImportance, {"default tag"}),
-  Writing("Beaver mentality", "A reflection on the mindset of the beaver", "The beaver is a hard worker, determined to build their dam.", DateTime.now(), highImportance, {"default tag"})];
+String sampleTitle = "Lorem Ipsum";
+String sampleDescription = "Lorem Ipsum reflection & meditations";
+String sampleText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+Set sampleTags;
+
+
+
+List<Writing> writings = [Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), highImportance, {"default tag"}),
+  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), highestImportance, {"default tag"}),
+  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), mediumImportance, {"default tag", "Willpower"}),
+  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), mediumImportance, {"default tag"}),
+  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), mediumImportance, {"default tag"}),
+  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), mediumImportance, {"default tag"}),
+  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), lowImportance, {"default tag"}),
+  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), mediumImportance, {"default tag"}),
+  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), mediumImportance, {"default tag"}),
+  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), mediumImportance, {"default tag"}),
+  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), highImportance, {"default tag"}),
+  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), highestImportance, {"default tag"}),
+  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), highImportance, {"default tag"})];
 
 
 
@@ -51,13 +58,14 @@ class _homeScreenState extends State<homeScreen> {
     tagFolders = getTagFolders(writingTagMap, context, tags);
   }
 
+
   @override
   Widget build(BuildContext context) {
     print("Build called");
     update();
     return Scaffold(
       appBar: AppBar(
-        title: AppBarTitle("home screen"),
+        title: Center(child: AppBarTitle("home screen")),
         backgroundColor: Colors.blueGrey[700],
       ),
       body: Container(
@@ -81,16 +89,19 @@ class _homeScreenState extends State<homeScreen> {
               flex: 2,
               child: RaisedButton.icon(
                   onPressed: () {
-                    setState(() {
-                      update();
+                    Navigator.pushNamed(context, "/writingScreen", arguments: {
+                      "WritingsToDisplay": writings,
+                      "Writings": writings
+                    }).then((value) {
+                      setState(() {
+                        update();
+                      });
                     });
-                    Navigator.pushNamed(context, "/writingScreen", arguments: {"WritingsToDisplay":writings, "Writings":writings});
-                    },
+                  },
                   icon: Icon(Icons.format_align_left),
                   label: Text("All"),
               color: Colors.blueGrey[300],)
             )
-
           ],
         ),
       ),
@@ -215,4 +226,6 @@ Widget getFolderCard(String title, Color color){
   );
 
 }
+
+
 

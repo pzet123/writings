@@ -15,30 +15,46 @@ class _writingScreenState extends State<writingScreen> with SingleTickerProvider
   static const String mediumImportance = "Medium";
   static const String lowImportance = "Normal";
 
-
-  AnimationController _breathingAnimationController;
+  AnimationController _repeatingAnimationController;
   Animation _breathingAnimation;
+  Animation _redpillColourShift;
+
+
+
 
   @override
   void initState(){
-    _breathingAnimationController = AnimationController(vsync:this, duration: Duration(seconds: 1));
-    _breathingAnimationController.repeat(reverse: true);
-    _breathingAnimation = Tween(begin: 0.2, end: 5.0).animate(_breathingAnimationController)..addListener(() {
-      setState(() {
-
-      });
-    });
     super.initState();
-  }
+
+    _repeatingAnimationController = AnimationController(
+      duration: Duration(seconds: 2),
+      vsync: this,
+    );
+    _breathingAnimation = Tween(begin: 0.0, end: 4.0).animate(_repeatingAnimationController);
+    _redpillColourShift = ColorTween(begin: Colors.orange[600], end: Color.fromARGB(100, 255, 33, 38)).animate(_repeatingAnimationController);
+
+    _repeatingAnimationController.forward();
+
+    _repeatingAnimationController.addStatusListener((status) {
+      if(status == AnimationStatus.completed) {
+        _repeatingAnimationController.reverse();
+      } else if(status == AnimationStatus.dismissed) {
+        _repeatingAnimationController.forward();
+      }
+    });
+
+    }
+
+
+
 
   @override
   void dispose(){
-    if(_breathingAnimationController.status == AnimationStatus.forward || _breathingAnimationController.status == AnimationStatus.reverse){
-      _breathingAnimationController.notifyStatusListeners(AnimationStatus.dismissed);
-    }
-    _breathingAnimationController.dispose();
+    _repeatingAnimationController.dispose();
     super.dispose();
-  } //TODO: Learn what this code does.
+
+
+  }
 
 
 
@@ -65,7 +81,6 @@ class _writingScreenState extends State<writingScreen> with SingleTickerProvider
         onPressed: () {
           Navigator.pushNamed(context, "/writingCreation", arguments: writings);
           writings.add(Writing("Test writing","Test","Test writing ..", DateTime.now(), "Red pill", {"Life events", "Friends"}));
-          //TODO: Make sure that new writings show up in importance and tag folders.
         },
         backgroundColor: Colors.blueGrey,
         child:
@@ -96,7 +111,7 @@ class _writingScreenState extends State<writingScreen> with SingleTickerProvider
   }
 
 
-  Container decideContainer(Writing writing){
+  Widget decideContainer(Writing writing){
     switch(writing.importance){
       case highestImportance: {
         return getHighestImportanceContainer(writing);
@@ -113,59 +128,69 @@ class _writingScreenState extends State<writingScreen> with SingleTickerProvider
     }
   }
 
-  Container getHighestImportanceContainer(Writing writing){
-    return Container(
-      margin: EdgeInsets.all(8),
-      child: Card(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-            child: Column(
-              children: [
-                Text(writing.title),
-                Divider(thickness: 4, height: 8,),
-                Text(writing.description),
-              ],
-            ),
+  Widget getHighestImportanceContainer(Writing writing){
+    return AnimatedBuilder(
+      animation: _breathingAnimation,
+      builder: (BuildContext context, _) {
+        return Container(
+          margin: EdgeInsets.all(8),
+          child: Card(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                child: Column(
+                  children: [
+                    Text(writing.title),
+                    Divider(thickness: 4, height: 8,),
+                    Text(writing.description),
+                  ],
+                ),
+              ),
+              color: _redpillColourShift.value
           ),
-          color: Color.fromARGB(200, 200, 33, 4)
-      ),
-      decoration: BoxDecoration(
-          boxShadow: [BoxShadow(
-            color: Colors.orange[600],
-            blurRadius: 4,
-            spreadRadius: _breathingAnimation.value,
-          )]
-      ),
+          decoration: BoxDecoration(
+              boxShadow: [BoxShadow(
+                color: Colors.orange[600],
+                blurRadius: _breathingAnimation.value*2,
+                spreadRadius: _breathingAnimation.value,
+              )]
+          ),
+        );
+      },
     );
   }
 
-  Container getHighImportanceContainer(Writing writing){
-    return Container(
-      margin: EdgeInsets.all(8),
-      child: Card(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-            child: Column(
-              children: [
-                Text(writing.title),
-                Divider(thickness: 4, height: 8,),
-                Text(writing.description),
-              ],
-            ),
+  Widget getHighImportanceContainer(Writing writing){
+    return AnimatedBuilder(
+      animation: _breathingAnimation,
+      builder: (BuildContext context, _){
+        return Container(
+          margin: EdgeInsets.all(8),
+          child: Card(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                child: Column(
+                  children: [
+                    Text(writing.title),
+                    Divider(thickness: 4, height: 8,),
+                    Text(writing.description),
+                  ],
+                ),
+              ),
+              color: Colors.purple[300]
           ),
-          color: Colors.green
-      ),
-      decoration: BoxDecoration(
-          boxShadow: [BoxShadow(
-            color: Color.fromARGB(50, 200, 0, 214),
-            blurRadius: _breathingAnimation.value,
-            spreadRadius: _breathingAnimation.value,
-          )]
-      ),
+          decoration: BoxDecoration(
+              boxShadow: [BoxShadow(
+                color: Color.fromARGB(100, 200, 0, 214),
+                blurRadius: _breathingAnimation.value * 2,
+                spreadRadius: _breathingAnimation.value,
+              )]
+          ),
+        );
+      }
     );
   }
 
-  Container getMediumImportanceContainer(Writing writing){
+  Widget getMediumImportanceContainer(Writing writing){
     return Container(
       margin: EdgeInsets.all(8),
       child: Card(
@@ -184,7 +209,7 @@ class _writingScreenState extends State<writingScreen> with SingleTickerProvider
     );
   }
 
-  Container getLowImportanceContainer(Writing writing){
+  Widget getLowImportanceContainer(Writing writing){
     return Container(
       margin: EdgeInsets.all(8),
       child: Card(

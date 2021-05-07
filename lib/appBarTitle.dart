@@ -21,15 +21,13 @@ class _AppBarTitleState extends State<AppBarTitle> {
   Widget build(BuildContext context) {
     return TweenAnimationBuilder(
         tween: Tween<double>(begin: 0, end: 1),
-        duration: Duration(seconds: 1),
+        duration: Duration(milliseconds: 700),
         child: Text(this.title),
         builder: (BuildContext context, double val, Widget child){
           return Opacity(
               opacity: val,
-              child: Center(
-                child: child,
-                widthFactor: val * 3,
-              ));
+              child: child
+          );
         });
   }
 }
