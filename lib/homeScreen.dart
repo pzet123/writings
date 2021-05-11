@@ -59,6 +59,132 @@ class _homeScreenState extends State<homeScreen> {
   }
 
 
+  void displayWritings(List writingsToDisplay){
+    print(writingsToDisplay.toString());
+    Navigator.pushNamed(context, "/writingScreen", arguments: {
+      "WritingsToDisplay": writingsToDisplay,
+      "Writings": writings,
+      "tags": tags
+    }).then((value) {
+      setState(() {
+        update();
+      });
+    });
+  }
+
+  List<Widget> getTagFolders(Map writingTagMap, BuildContext context, HashSet tags){
+    List<Widget> tagFolderCards = tags.map((tag) {
+      return GestureDetector(
+        child: getFolderCard(tag, Colors.blueGrey[300]),
+        onTap: (){
+          displayWritings(writingTagMap[tag]);
+        },
+      );
+    }).toList();
+    return tagFolderCards;
+  }
+
+  Map sortWritingsByImportance(){
+    Map writingMap = new Map();
+    List<Writing> redPillWritings = [];
+    List<Writing> highImportanceWritings = [];
+    List<Writing> mediumImportanceWritings = [];
+    List<Writing> lowImportanceWritings = [];
+    for(Writing writing in writings){
+      switch(writing.importance){
+        case highestImportance: {
+          redPillWritings.add(writing);
+        } break;
+        case highImportance: {
+          highImportanceWritings.add(writing);
+        } break;
+        case mediumImportance: {
+          mediumImportanceWritings.add(writing);
+        } break;
+        case lowImportance: {
+          lowImportanceWritings.add(writing);
+        } break;
+      }
+    }
+    writingMap = {
+      highestImportance : redPillWritings,
+      highImportance : highImportanceWritings,
+      mediumImportance : mediumImportanceWritings,
+      lowImportance : lowImportanceWritings,
+    };
+    return writingMap;
+  }
+
+
+  Map sortWritingsByTag(List<String> tags){
+    Map writingMap = new Map();
+    List<Writing> writingTemp = writings;
+    for(String tag in tags.toList()){
+      List<Writing> writingTagList = new List();
+      for(Writing writing in writingTemp){
+        if(writing.tags.contains(tag)) {
+          writingTagList.add(writing);
+        }
+      }
+      writingMap[tag] = writingTagList;
+
+    }
+    return writingMap;
+  }
+
+  List<Widget> getImportanceFolders(Map writingImportanceMap, BuildContext context){
+    List<Widget> importanceFolderCards = folderImportanceAttributes.map((importanceAttributes) {
+      return GestureDetector(
+        child: getFolderCard(importanceAttributes[0], importanceAttributes[1]),
+        onTap: () {
+          displayWritings(writingImportanceMap[importanceAttributes[0]]);
+        },
+      );
+    }).toList();
+    return importanceFolderCards;
+  }
+
+  Widget getFolderCard(String title, Color color){
+    return Card(
+      color: color,
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Center(
+          child: Text(title,
+              style: TextStyle(
+                fontSize: 24,
+              )),
+        ),
+      ),
+    );
+
+  }
+
+  Widget getFolderWidget(List<Widget> folderCards){
+    List<Widget> folderRows = [];
+    for(int i = 0; i < folderCards.length; i += 2){
+      folderRows.add(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(flex: 1, child: folderCards[i]),
+              SizedBox(width: folderCards.length - i > 1 ? 10:0,),
+              folderCards.length - i > 1 ? Expanded(flex: 1, child: folderCards[i+1]):SizedBox(width: 0,),
+            ],
+          )
+      );
+    }
+    return Column(
+        children: folderRows
+    );
+
+  }
+
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     print("Build called");
@@ -89,14 +215,7 @@ class _homeScreenState extends State<homeScreen> {
               flex: 2,
               child: RaisedButton.icon(
                   onPressed: () {
-                    Navigator.pushNamed(context, "/writingScreen", arguments: {
-                      "WritingsToDisplay": writings,
-                      "Writings": writings
-                    }).then((value) {
-                      setState(() {
-                        update();
-                      });
-                    });
+                    displayWritings(writings);
                   },
                   icon: Icon(Icons.format_align_left),
                   label: Text("All"),
@@ -110,52 +229,9 @@ class _homeScreenState extends State<homeScreen> {
 }
 
 
-Map sortWritingsByImportance(){
-  Map writingMap = new Map();
-  List<Writing> redPillWritings = [];
-  List<Writing> highImportanceWritings = [];
-  List<Writing> mediumImportanceWritings = [];
-  List<Writing> lowImportanceWritings = [];
-  for(Writing writing in writings){
-    switch(writing.importance){
-      case highestImportance: {
-        redPillWritings.add(writing);
-      } break;
-      case highImportance: {
-        highImportanceWritings.add(writing);
-      } break;
-      case mediumImportance: {
-        mediumImportanceWritings.add(writing);
-      } break;
-      case lowImportance: {
-        lowImportanceWritings.add(writing);
-      } break;
-    }
-  }
-  writingMap = {
-    highestImportance : redPillWritings,
-    highImportance : highImportanceWritings,
-    mediumImportance : mediumImportanceWritings,
-    lowImportance : lowImportanceWritings,
-  };
-  return writingMap;
-}
 
-Map sortWritingsByTag(List<String> tags){
-  Map writingMap = new Map();
-  List<Writing> writingTemp = writings;
-  for(String tag in tags.toList()){
-    List<Writing> writingTagList = new List();
-    for(Writing writing in writingTemp){
-      if(writing.tags.contains(tag)) {
-        writingTagList.add(writing);
-      }
-    }
-    writingMap[tag] = writingTagList;
 
-  }
-  return writingMap;
-}
+
 
 HashSet<String> getTags(){
   HashSet<String> tags = new HashSet();
@@ -167,65 +243,12 @@ HashSet<String> getTags(){
   return tags;
 }
 
-Widget getFolderWidget(List<Widget> folderCards){
-  List<Widget> folderRows = [];
-  for(int i = 0; i < folderCards.length; i += 2){
-    folderRows.add(
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(flex: 1, child: folderCards[i]),
-          SizedBox(width: folderCards.length - i > 1 ? 10:0,),
-          folderCards.length - i > 1 ? Expanded(flex: 1, child: folderCards[i+1]):SizedBox(width: 0,),
-        ],
-      )
-    );
-  }
-  return Column(
-    children: folderRows
-  );
 
-}
 
-List<Widget> getImportanceFolders(Map writingImportanceMap, BuildContext context){
-  List<Widget> importanceFolderCards = folderImportanceAttributes.map((importanceAttributes) {
-    return GestureDetector(
-      child: getFolderCard(importanceAttributes[0], importanceAttributes[1]),
-      onTap: () {
-        Navigator.pushNamed(context, "/writingScreen", arguments: {"WritingsToDisplay":writingImportanceMap[importanceAttributes[0]], "Writings":writings});
-      },
-    );
-  }).toList();
-  return importanceFolderCards;
-}
 
-List<Widget> getTagFolders(Map writingTagMap, BuildContext context, HashSet tags){
-  List<Widget> tagFolderCards = tags.map((tag) {
-    return GestureDetector(
-      child: getFolderCard(tag, Colors.blueGrey[300]),
-      onTap: (){
-        Navigator.pushNamed(context, "/writingScreen", arguments: {"WritingsToDisplay":writingTagMap[tag], "Writings":writings});
-      },
-    );
-  }).toList();
-  return tagFolderCards;
-}
 
-Widget getFolderCard(String title, Color color){
-  return Card(
-    color: color,
-    child: Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Center(
-        child: Text(title,
-        style: TextStyle(
-          fontSize: 24,
-        )),
-      ),
-    ),
-  );
 
-}
+
 
 
 

@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:writings/Writing.dart';
 import 'appBarTitle.dart';
@@ -63,6 +65,12 @@ class _writingScreenState extends State<writingScreen> with SingleTickerProvider
     Map writingsMap = ModalRoute.of(context).settings.arguments;
     List<Writing> writingsToDisplay = writingsMap["WritingsToDisplay"];
     List<Writing> writings = writingsMap["Writings"];
+    HashSet tags = writingsMap["tags"];
+    Map tagCheckValues = new Map();
+    for(String tag in tags){
+      print(tag);
+      tagCheckValues[tag] = false;
+    }
     return Scaffold(
       appBar: AppBar(
         title: AppBarTitle("Writings"),
@@ -79,7 +87,7 @@ class _writingScreenState extends State<writingScreen> with SingleTickerProvider
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, "/writingCreation", arguments: writings);
+          Navigator.pushNamed(context, "/writingCreation", arguments: {"writings" : writings, "tags" : tags, "tagCheckValues" : tagCheckValues});
           writings.add(Writing("Test writing","Test","Test writing ..", DateTime.now(), "Red pill", {"Life events", "Friends"}));
         },
         backgroundColor: Colors.blueGrey,
