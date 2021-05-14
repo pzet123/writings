@@ -42,7 +42,7 @@ class homeScreen extends StatefulWidget {
 }
 
 class _homeScreenState extends State<homeScreen> {
-  HashSet tags;
+  HashSet tags = new HashSet<String>();
 
   Map writingImportanceMap;
   Map writingTagMap;
@@ -51,11 +51,20 @@ class _homeScreenState extends State<homeScreen> {
   List<Widget> tagFolders;
 
   void update(){
-    tags = getTags();
     writingImportanceMap = sortWritingsByImportance();
     writingTagMap = sortWritingsByTag(tags.toList());
     importanceFolders = getImportanceFolders(writingImportanceMap, context);
     tagFolders = getTagFolders(writingTagMap, context, tags);
+  }
+
+  @override
+  void initState(){
+    super.initState();
+    tags.add("Legacy");
+    tags.add("Willpower");
+    tags.add("Friends");
+    tags.add("Life events");
+    tags.add("default tag");
   }
 
 
@@ -232,16 +241,6 @@ class _homeScreenState extends State<homeScreen> {
 
 
 
-
-HashSet<String> getTags(){
-  HashSet<String> tags = new HashSet();
-  tags.add("Legacy");
-  tags.add("Willpower");
-  tags.add("Friends");
-  tags.add("Life events");
-  tags.add("default tag");
-  return tags;
-}
 
 
 

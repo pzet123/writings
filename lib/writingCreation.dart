@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:writings/Writing.dart';
 
@@ -13,18 +14,43 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
   @override
 
   String importance = "Normal";
+  HashSet tags;
+  Map tagCheckValues;
 
   TextEditingController titleInputController = new TextEditingController();
   TextEditingController descriptionInputController = new TextEditingController();
   TextEditingController textInputController = new TextEditingController();
+  TextEditingController newTagController = new TextEditingController();
+
+  createNewTagWindow(BuildContext context){
+    return showDialog(context: context, builder: (context) {
+      return AlertDialog(
+        title: Text("New tag"),
+        content: TextField(controller: newTagController,),
+        actions: [
+          RaisedButton(
+              onPressed: () {
+                setState(() {
+                  print(newTagController.text);
+                  tags.add(newTagController.text);
+                  tagCheckValues[newTagController.text] = false;
+                });
+      },
+          child: Text("Submit"),
+          )
+        ],
+      );
+    });
+  }
 
 
 
   Widget build(BuildContext context) {
     Map writingsMap = ModalRoute.of(context).settings.arguments;
     List<Writing> writings = writingsMap["writings"];
-    HashSet tags = writingsMap["tags"];
-    Map tagCheckValues = writingsMap["tagCheckValues"];
+    tags = writingsMap["tags"];
+    print(tags.toString());
+    tagCheckValues = writingsMap["tagCheckValues"];
     return Scaffold(
       appBar: AppBar(
         title: Text("Writing creation"),
@@ -84,9 +110,21 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
                       },
                       title: Text(tag),
                   );
-                }).toList(),
+                }).toList().cast<Widget>() + [RaisedButton(
+                    onPressed: () {
+                      createNewTagWindow(context);
+                    },
+                    color: Colors.blueGrey[900],
+                    child: Row(
+                      children: [
+                        Icon(Icons.add),
+                        Text("Add a new tag"),
+                      ],
+                    ),
+                    )
+                ]
               ),
-            )
+            ),
           ],
         ),
       ),
