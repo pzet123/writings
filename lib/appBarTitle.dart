@@ -17,6 +17,7 @@ class _AppBarTitleState extends State<AppBarTitle> {
   _AppBarTitleState(String title){
     this.title = title;
   }
+
   @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder(

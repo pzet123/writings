@@ -17,4 +17,4 @@ void main() => runApp(new MaterialApp(
 ));
 
 
-
+//TODO: Add the ability to store writings

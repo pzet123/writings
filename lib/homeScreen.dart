@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:writings/Writing.dart';
 import 'appBarTitle.dart';
+import 'package:path_provider/path_provider.dart';
 const String highestImportance = "Red pill";
 const String highImportance = "High";
 const String mediumImportance = "Medium";
@@ -69,7 +70,6 @@ class _homeScreenState extends State<homeScreen> {
 
 
   void displayWritings(List writingsToDisplay){
-    print(writingsToDisplay.toString());
     Navigator.pushNamed(context, "/writingScreen", arguments: {
       "WritingsToDisplay": writingsToDisplay,
       "Writings": writings,
@@ -88,9 +88,24 @@ class _homeScreenState extends State<homeScreen> {
         onTap: (){
           displayWritings(writingTagMap[tag]);
         },
+        onLongPress: () {
+          setState(() {
+            tags.remove(tag);
+            removeTagWritings(tag);
+          });
+
+        },
       );
     }).toList();
     return tagFolderCards;
+  }
+
+  void removeTagWritings(String tag){
+    for(Writing writing in List.unmodifiable(writings)){
+      if(writing.tags.contains(tag)){
+        writings.remove(writing);
+      }
+    }
   }
 
   Map sortWritingsByImportance(){
@@ -192,11 +207,8 @@ class _homeScreenState extends State<homeScreen> {
 
 
 
-
-
   @override
   Widget build(BuildContext context) {
-    print("Build called");
     update();
     return Scaffold(
       appBar: AppBar(

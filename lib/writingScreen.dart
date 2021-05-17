@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:writings/Writing.dart';
+import 'package:writings/homeScreen.dart';
 import 'appBarTitle.dart';
 
 
@@ -10,12 +11,14 @@ class writingScreen extends StatefulWidget {
   _writingScreenState createState() => _writingScreenState();
 }
 
-class _writingScreenState extends State<writingScreen> with SingleTickerProviderStateMixin {
+class _writingScreenState extends State<writingScreen> with TickerProviderStateMixin {
 
   static const String highestImportance = "Red pill";
   static const String highImportance = "High";
   static const String mediumImportance = "Medium";
   static const String lowImportance = "Normal";
+
+  final _animatedListKey = GlobalKey<AnimatedListState>();
 
   AnimationController _repeatingAnimationController;
   Animation _breathingAnimation;
@@ -45,6 +48,7 @@ class _writingScreenState extends State<writingScreen> with SingleTickerProvider
       }
     });
 
+
     }
 
 
@@ -68,7 +72,6 @@ class _writingScreenState extends State<writingScreen> with SingleTickerProvider
     HashSet tags = writingsMap["tags"];
     Map tagCheckValues = new Map();
     for(String tag in tags){
-      print(tag);
       tagCheckValues[tag] = false;
     }
     return Scaffold(
@@ -79,16 +82,17 @@ class _writingScreenState extends State<writingScreen> with SingleTickerProvider
       ),
       body: Container(
         color: Colors.blueGrey[900],
-        child: Scrollbar(
-          child: ListView(
-            children: getWritingsWidgets(writingsToDisplay),
-          ),
+        child: AnimatedList(
+          key: _animatedListKey,
+          initialItemCount: writingsToDisplay.length,
+          itemBuilder: (context, index, animation) {
+            return getWritingsWidgets(writingsToDisplay)[index];
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, "/writingCreation", arguments: {"writings" : writings, "tags" : tags, "tagCheckValues" : tagCheckValues});
-          writings.add(Writing("Test writing","Test","Test writing ..", DateTime.now(), "Red pill", {"Life events", "Friends"}));
+          Navigator.pushNamed(context, "/writingCreation", arguments: {"writings" : writings, "tags" : tags, "tagCheckValues" : tagCheckValues, "writingsToDisplay" : writingsToDisplay}).then((value) => setState((){}));
         },
         backgroundColor: Colors.blueGrey,
         child:
@@ -104,16 +108,31 @@ class _writingScreenState extends State<writingScreen> with SingleTickerProvider
   List<Widget> getWritingsWidgets(List<Writing> writings){
     List<Widget> writingWidgets = [];
     for(Writing writing in writings){
-      writingWidgets.add(generateWritingWidget(writing));
+      writingWidgets.add(generateWritingWidget(writing, writings));
     }
     return writingWidgets;
   }
 
-  Widget generateWritingWidget(Writing writing){
+  Widget generateWritingWidget(Writing writing, List<Writing> writingsToDisplay){
     return GestureDetector(
       child: decideContainer(writing),
       onTap: () {
         Navigator.pushNamed(context, "/writingViewing", arguments: writing);
+      },
+      onLongPress: () {
+        int index = writingsToDisplay.indexOf(writing);
+        Widget removedWritingWidget = getWritingsWidgets(writingsToDisplay)[index];
+        _animatedListKey.currentState.removeItem(index,
+                (context, animation) => FadeTransition(
+                  opacity: animation,
+                  child: removedWritingWidget,
+                    ));
+        setState(() {
+           writingsToDisplay.remove(writing);
+           writings.remove(writing);         
+        });
+        writingsToDisplay.remove(writing);
+        writings.remove(writing);
       },
     );
   }

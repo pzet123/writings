@@ -22,6 +22,15 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
   TextEditingController textInputController = new TextEditingController();
   TextEditingController newTagController = new TextEditingController();
 
+  @override
+  void dispose(){
+    titleInputController.dispose();
+    descriptionInputController.dispose();
+    textInputController.dispose();
+    newTagController.dispose();
+    super.dispose();
+  }
+
   createNewTagWindow(BuildContext context){
     return showDialog(context: context, builder: (context) {
       return AlertDialog(
@@ -34,6 +43,7 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
                   print(newTagController.text);
                   tags.add(newTagController.text);
                   tagCheckValues[newTagController.text] = false;
+                  Navigator.pop(context);
                 });
       },
           child: Text("Submit"),
@@ -48,6 +58,7 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
   Widget build(BuildContext context) {
     Map writingsMap = ModalRoute.of(context).settings.arguments;
     List<Writing> writings = writingsMap["writings"];
+    List<Writing> writingsToDisplay = writingsMap["writingsToDisplay"];
     tags = writingsMap["tags"];
     print(tags.toString());
     tagCheckValues = writingsMap["tagCheckValues"];
@@ -136,7 +147,9 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
               selectedTags.add(key);
             }
           }
-          writings.add(new Writing(titleInputController.text, descriptionInputController.text, textInputController.text, DateTime.now(), importance, selectedTags));
+          Writing newWriting = new Writing(titleInputController.text, descriptionInputController.text, textInputController.text, DateTime.now(), importance, selectedTags);
+          writings.add(newWriting);
+          //writingsToDisplay.add(newWriting);
           Navigator.pop(context);
         },
         child: Icon(Icons.double_arrow_sharp),
