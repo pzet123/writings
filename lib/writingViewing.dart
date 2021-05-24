@@ -27,18 +27,21 @@ class _writingViewingState extends State<writingViewing> {
         color: Colors.blueGrey[200],
         child: Column(
           children: [
-            Divider(thickness: 3, height: 5,),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: ListView(
                   children: [
+                    SizedBox(height: 8,),
                     Text(writing.description,
                         maxLines: 3,
                         style: TextStyle(
                             fontSize: 18
                         )),
-                    Divider(thickness: 2, height: 10,),
+                    Divider(thickness: 4,
+                      height: 12,
+                      color: Colors.blueGrey[700],
+                    ),
                     Text(
                     writing.text,
                     style: TextStyle(

@@ -37,7 +37,7 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
         title: Text("New tag"),
         content: TextField(controller: newTagController,),
         actions: [
-          RaisedButton(
+          ElevatedButton(
               onPressed: () {
                 setState(() {
                   print(newTagController.text);
@@ -65,6 +65,7 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Writing creation"),
+        backgroundColor: Colors.blueGrey[700],
       ),
       body: Container(
         padding: EdgeInsets.all(5),
@@ -109,6 +110,9 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
                 });
               },
             ),
+            Divider(thickness: 4,
+              color: Colors.blueGrey[700],
+            ),
             Expanded(
               child: ListView(
                 children: tags.map((tag) {
@@ -121,17 +125,19 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
                       },
                       title: Text(tag),
                   );
-                }).toList().cast<Widget>() + [RaisedButton(
+                }).toList().cast<Widget>() + [ElevatedButton(
                     onPressed: () {
                       createNewTagWindow(context);
                     },
-                    color: Colors.blueGrey[900],
                     child: Row(
                       children: [
-                        Icon(Icons.add),
-                        Text("Add a new tag"),
+                        Icon(Icons.add,),
+                        Text("Add a new tag",),
                       ],
                     ),
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.blueGrey[700]),
+                  ),
                     )
                 ]
               ),

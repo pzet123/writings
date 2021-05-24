@@ -1,5 +1,7 @@
 
 import 'dart:collection';
+import 'package:json_annotation/json_annotation.dart';
+import 'dart:convert';
 
 class Writing{
   String _title;
@@ -18,6 +20,29 @@ class Writing{
     this._tags = tags;
   }
 
+  Writing.fromJson(Map<String, dynamic> json) :
+    this._title = json["title"],
+    this._description = json["description"],
+    this._text = debugmeth(json["text"]),
+    this._dateOfWriting = DateTime.parse(json["dateOfWriting"]),
+    this._importance = json["importance"],
+    this._tags = json["tags"].toSet();
+
+  Map<String, dynamic> toJson() => {
+    "title" : _title,
+    "description" : _description,
+    "text" : _text,
+    "dateOfWriting" : _dateOfWriting.toIso8601String(),
+    "importance" : _importance,
+    "tags" : _tags.toList()
+  };
+
+  static String debugmeth(text){
+    print("FROM JSON CALLED");
+    return text;
+  }
+
+
   String get importance => _importance;
 
   DateTime get dateOfWriting => _dateOfWriting;
@@ -29,8 +54,4 @@ class Writing{
   String get description => _description;
 
   Set get tags => _tags;
-
-
-
-
 }

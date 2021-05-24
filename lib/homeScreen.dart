@@ -1,5 +1,7 @@
 
 import 'dart:collection';
+import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -18,21 +20,7 @@ String sampleText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, se
 Set sampleTags;
 
 
-
-List<Writing> writings = [Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), highImportance, {"default tag"}),
-  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), highestImportance, {"default tag"}),
-  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), mediumImportance, {"default tag", "Willpower"}),
-  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), mediumImportance, {"default tag"}),
-  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), mediumImportance, {"default tag"}),
-  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), mediumImportance, {"default tag"}),
-  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), lowImportance, {"default tag"}),
-  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), mediumImportance, {"default tag"}),
-  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), mediumImportance, {"default tag"}),
-  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), mediumImportance, {"default tag"}),
-  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), highImportance, {"default tag"}),
-  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), highestImportance, {"default tag"}),
-  Writing(sampleTitle, sampleDescription, sampleText, DateTime.now(), highImportance, {"default tag"})];
-
+List<Writing> writings = [];
 
 
 class homeScreen extends StatefulWidget {
@@ -42,7 +30,9 @@ class homeScreen extends StatefulWidget {
   _homeScreenState createState() => _homeScreenState();
 }
 
-class _homeScreenState extends State<homeScreen> {
+class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
+  AppLifecycleState _lastLifecycleState;
+
   HashSet tags = new HashSet<String>();
 
   Map writingImportanceMap;
@@ -50,6 +40,26 @@ class _homeScreenState extends State<homeScreen> {
 
   List<Widget> importanceFolders;
   List<Widget> tagFolders;
+
+  File writingsFile;
+  Directory currentDirectory;
+  String fileName = "writings";
+  bool fileExists;
+
+
+  File createFile(List<Writing> newWritings){
+    writingsFile.createSync();
+    fileExists = true;
+    writeToFile(newWritings);
+  }
+
+  void writeToFile(List<Writing> newWritings){
+    if(fileExists){
+      print(newWritings);
+      writingsFile.writeAsStringSync(json.encode(newWritings));
+    }
+    else createFile(newWritings);
+  }
 
   void update(){
     writingImportanceMap = sortWritingsByImportance();
@@ -61,11 +71,43 @@ class _homeScreenState extends State<homeScreen> {
   @override
   void initState(){
     super.initState();
-    tags.add("Legacy");
-    tags.add("Willpower");
-    tags.add("Friends");
-    tags.add("Life events");
-    tags.add("default tag");
+    getApplicationDocumentsDirectory().then((Directory directory) {
+      currentDirectory = directory;
+      writingsFile = new File(currentDirectory.path + "/" + fileName);
+      print("Directory: " + writingsFile.path);
+      fileExists = writingsFile.existsSync();
+      if(fileExists) setState(() {
+        print("FILE EXISTS");
+        List<dynamic> decodedJSON = json.decode(writingsFile.readAsStringSync());
+        for(dynamic item in decodedJSON){
+          writings.add(Writing.fromJson(item));
+        }
+        updateTags();
+        print(tags);
+        print(writings);
+      });
+    });
+
+
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose(){
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state){
+    setState(() {
+      _lastLifecycleState = state;
+      print(_lastLifecycleState);
+      if(_lastLifecycleState == AppLifecycleState.inactive){
+        print("WRiting to FILE!!!");
+        writeToFile(writings);
+      }
+    });
   }
 
 
@@ -204,6 +246,17 @@ class _homeScreenState extends State<homeScreen> {
 
   }
 
+  void updateTags(){
+    for(Writing writing in writings){
+      for(String tag in writing.tags){
+        if(!tags.contains(tag)){
+          tags.add(tag);
+        }
+      }
+    }
+  }
+
+
 
 
 
@@ -212,7 +265,7 @@ class _homeScreenState extends State<homeScreen> {
     update();
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: AppBarTitle("home screen")),
+        title: Center(child: AppBarTitle("Folders")),
         backgroundColor: Colors.blueGrey[700],
       ),
       body: Container(
@@ -234,13 +287,16 @@ class _homeScreenState extends State<homeScreen> {
             ),
             Expanded(
               flex: 2,
-              child: RaisedButton.icon(
+              child: ElevatedButton.icon(
                   onPressed: () {
                     displayWritings(writings);
                   },
-                  icon: Icon(Icons.format_align_left),
-                  label: Text("All"),
-              color: Colors.blueGrey[300],)
+                  icon: Icon(Icons.format_align_left, color: Colors.black,),
+                  label: Text("All", style: TextStyle(color: Colors.black),),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.blueGrey[300]),
+                ),
+              )
             )
           ],
         ),
