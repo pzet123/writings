@@ -12,12 +12,9 @@ const String highestImportance = "Red pill";
 const String highImportance = "High";
 const String mediumImportance = "Medium";
 const String lowImportance = "Normal";
-const List folderImportanceAttributes = [[highestImportance, Colors.red], [highImportance, Color.fromARGB(255, 236, 239, 241)], [mediumImportance, Color.fromARGB(255, 207, 216, 220)], [lowImportance, Color.fromARGB(255, 176, 190, 197)]];
+const List folderImportanceAttributes = [[highestImportance, Colors.red], [highImportance, Color.fromARGB(255, 255,223,0)],
+  [mediumImportance, Color.fromARGB(255, 240, 240, 240)], [lowImportance, Color.fromARGB(255, 176, 190, 197)]];
 
-String sampleTitle = "Lorem Ipsum";
-String sampleDescription = "Lorem Ipsum reflection & meditations";
-String sampleText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-Set sampleTags;
 
 
 List<Writing> writings = [];
@@ -258,22 +255,42 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
 
 
 
-
-
   @override
   Widget build(BuildContext context) {
     update();
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: AppBarTitle("Folders")),
+        title: AppBarTitle("Folders"),
+        centerTitle: true,
         backgroundColor: Colors.blueGrey[700],
-      ),
-      body: Container(
-        color: Colors.blueGrey[900],
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
+        actions: [
+          IconButton(
+              icon: Icon(Icons.help),
+              onPressed: () {
+                Navigator.pushNamed(context, "/helpScreen");
+              })
+                ],
+                ),
+                body: Container(
+                decoration: BoxDecoration(
+                gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: [0.1, 0.5, 0.7, 0.95],
+                colors: [
+                Colors.blueGrey[700],
+                Colors.blueGrey[500],
+                Colors.blueGrey[400],
+                Colors.blueGrey[300]
+                ]
+
+                )
+                ),
+                child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(height: 8,),
+                Expanded(
               flex: 4,
                 child: getFolderWidget(importanceFolders)),
             Divider(thickness: 3, height: 10, color: Colors.white,),

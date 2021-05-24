@@ -203,11 +203,11 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
                   ],
                 ),
               ),
-              color: Colors.purple[300]
+              color: Color.fromARGB(255, 255,223,0)
           ),
           decoration: BoxDecoration(
               boxShadow: [BoxShadow(
-                color: Color.fromARGB(100, 200, 0, 214),
+                color: Color.fromARGB(100, 255, 212, 0),
                 blurRadius: _breathingAnimation.value * 2,
                 spreadRadius: _breathingAnimation.value,
               )]

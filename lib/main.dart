@@ -6,6 +6,7 @@ import 'package:writings/homeScreen.dart';
 import 'writingScreen.dart';
 import 'package:writings/writingCreation.dart';
 import 'package:writings/writingViewing.dart';
+import 'helpScreen.dart';
 
 void main() => runApp(new MaterialApp(
   initialRoute: "/home",
@@ -13,8 +14,7 @@ void main() => runApp(new MaterialApp(
           "/writingScreen" : (context) => writingScreen(),
           "/writingCreation" : (context) => writingCreationScreen(),
           "/writingViewing" : (context) => writingViewing(),
+          "/helpScreen" : (context) => helpScreen(),
   },
 ));
 
-
-//TODO: Add the ability to store writings

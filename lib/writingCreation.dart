@@ -93,7 +93,7 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
             ),
             DropdownButton(
               hint: Text("Importance"),
-              icon: Icon(Icons.assessment),
+              icon: Icon(Icons.keyboard_arrow_down),
               value: importance,
               items: ["Normal", "Medium", "High", "Red pill"].map((importanceValue) {
                   return DropdownMenuItem(
