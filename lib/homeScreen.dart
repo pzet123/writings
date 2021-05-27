@@ -306,7 +306,7 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
               flex: 2,
               child: ElevatedButton.icon(
                   onPressed: () {
-                    displayWritings(writings);
+                    displayWritings(List.from(writings).cast<Writing>());
                   },
                   icon: Icon(Icons.format_align_left, color: Colors.black,),
                   label: Text("All", style: TextStyle(color: Colors.black),),

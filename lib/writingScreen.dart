@@ -18,6 +18,8 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
   static const String mediumImportance = "Medium";
   static const String lowImportance = "Normal";
 
+  List<Writing> writingsToDisplay = [];
+
   final _animatedListKey = GlobalKey<AnimatedListState>();
 
   AnimationController _repeatingAnimationController;
@@ -67,7 +69,7 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
   @override
   Widget build(BuildContext context) {
     Map writingsMap = ModalRoute.of(context).settings.arguments;
-    List<Writing> writingsToDisplay = writingsMap["WritingsToDisplay"];
+    writingsToDisplay = writingsMap["WritingsToDisplay"];
     List<Writing> writings = writingsMap["Writings"];
     HashSet tags = writingsMap["tags"];
     Map tagCheckValues = new Map();
@@ -92,7 +94,13 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, "/writingCreation", arguments: {"writings" : writings, "tags" : tags, "tagCheckValues" : tagCheckValues, "writingsToDisplay" : writingsToDisplay}).then((value) => setState((){}));
+          Navigator.pushNamed(context, "/writingCreation", arguments: {"writings" : writings, "tags" : tags, "tagCheckValues" : tagCheckValues, "writingsToDisplay" : writingsToDisplay}).then((newWriting) => setState((){
+            if(newWriting != null) {
+              writingsToDisplay.add(newWriting);
+              writings.add(newWriting);
+              _animatedListKey.currentState.insertItem(writingsToDisplay.length - 1);
+            }
+          }));
         },
         backgroundColor: Colors.blueGrey,
         child:

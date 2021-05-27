@@ -154,12 +154,12 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
             }
           }
           Writing newWriting = new Writing(titleInputController.text, descriptionInputController.text, textInputController.text, DateTime.now(), importance, selectedTags);
-          writings.add(newWriting);
-          //writingsToDisplay.add(newWriting);
-          Navigator.pop(context);
+          Navigator.pop(context, newWriting);
         },
         child: Icon(Icons.double_arrow_sharp),
       ),
     );
   }
 }
+
+//TODO: Ensure empty writings cannot be created

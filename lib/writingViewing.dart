@@ -6,7 +6,7 @@ class writingViewing extends StatefulWidget {
   @override
   _writingViewingState createState() => _writingViewingState();
 }
-
+//TODO: In order to allow for editing writings, create a button which will pass the current writing information to the writing creation screen allowing the user to modify it.
 class _writingViewingState extends State<writingViewing> {
   @override
   Widget build(BuildContext context) {
