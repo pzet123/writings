@@ -1,30 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class HelpScreenEntry extends StatelessWidget {
   String title;
   String description;
-  HelpScreenEntry(String title, String description){
+  IconData sectionIcon;
+  HelpScreenEntry(String title, String description, IconData sectionIcon){
     this.title = title;
     this.description = description;
+    this.sectionIcon = sectionIcon;
   }
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        SizedBox(height: 8,),
-        Text(this.title,
-        style: TextStyle(
-          fontSize: 24,
-          ),
-        ),
-        SizedBox(height: 5,),
-        Text(this.description,
-        style: TextStyle(
-          fontSize: 20,
-          ),
-        ),
-        Divider(height: 15, thickness: 4, color: Colors.white,)
-      ],
+        children: [
+          ListTile(
+            title: Text(title),
+            leading: Icon(sectionIcon),
+          )
+        ],
     );
   }
 }

@@ -8,12 +8,14 @@ import 'package:flutter/rendering.dart';
 import 'package:writings/Writing.dart';
 import 'appBarTitle.dart';
 import 'package:path_provider/path_provider.dart';
+
+
 const String highestImportance = "Red pill";
 const String highImportance = "High";
 const String mediumImportance = "Medium";
-const String lowImportance = "Normal";
+const String lowImportance = "Blue Pill";
 const List folderImportanceAttributes = [[highestImportance, Colors.red], [highImportance, Color.fromARGB(255, 255,223,0)],
-  [mediumImportance, Color.fromARGB(255, 240, 240, 240)], [lowImportance, Color.fromARGB(255, 176, 190, 197)]];
+  [mediumImportance, Color.fromARGB(255, 240, 240, 240)], [lowImportance, Colors.blue]];
 
 
 
@@ -38,54 +40,55 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
   List<Widget> importanceFolders;
   List<Widget> tagFolders;
 
+
+  Directory hostFileDirectory;
+
   File writingsFile;
-  Directory currentDirectory;
-  String fileName = "writings";
-  bool fileExists;
+  String writingsFileName = "writings";
+  bool writingsFileExists;
+
+  File tagsFile;
+  String tagsFileName = "tags";
+  bool tagsFileExists;
 
 
-  File createFile(List<Writing> newWritings){
-    writingsFile.createSync();
+  File createFile(String jsonString, File file, bool fileExists){
+    file.createSync();
     fileExists = true;
-    writeToFile(newWritings);
+    writeToFile(jsonString, file, fileExists);
   }
 
-  void writeToFile(List<Writing> newWritings){
+  void writeToFile(String jsonString, File file, bool fileExists){
     if(fileExists){
-      print(newWritings);
-      writingsFile.writeAsStringSync(json.encode(newWritings));
+      file.writeAsStringSync(jsonString);
     }
-    else createFile(newWritings);
+    else createFile(jsonString, file, fileExists);
   }
-
-  void update(){
-    writingImportanceMap = sortWritingsByImportance();
-    writingTagMap = sortWritingsByTag(tags.toList());
-    importanceFolders = getImportanceFolders(writingImportanceMap, context);
-    tagFolders = getTagFolders(writingTagMap, context, tags);
-  }
+  
 
   @override
   void initState(){
     super.initState();
     getApplicationDocumentsDirectory().then((Directory directory) {
-      currentDirectory = directory;
-      writingsFile = new File(currentDirectory.path + "/" + fileName);
-      print("Directory: " + writingsFile.path);
-      fileExists = writingsFile.existsSync();
-      if(fileExists) setState(() {
-        print("FILE EXISTS");
+      hostFileDirectory = directory;
+      writingsFile = new File(hostFileDirectory.path + "/" + writingsFileName);
+      tagsFile = new File(hostFileDirectory.path + "/" + tagsFileName);
+      writingsFileExists = writingsFile.existsSync();
+      tagsFileExists = tagsFile.existsSync();
+      if(writingsFileExists) setState(() {
         List<dynamic> decodedJSON = json.decode(writingsFile.readAsStringSync());
         for(dynamic item in decodedJSON){
           writings.add(Writing.fromJson(item));
         }
-        updateTags();
-        print(tags);
-        print(writings);
+        //updateTags();
+      });
+      if(tagsFileExists) setState(() {
+        List<dynamic> decodedJSON = json.decode(tagsFile.readAsStringSync());
+        for(dynamic item in decodedJSON){
+          tags.add(item);
+        }
       });
     });
-
-
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -99,10 +102,9 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
   void didChangeAppLifecycleState(AppLifecycleState state){
     setState(() {
       _lastLifecycleState = state;
-      print(_lastLifecycleState);
       if(_lastLifecycleState == AppLifecycleState.inactive){
-        print("WRiting to FILE!!!");
-        writeToFile(writings);
+        writeToFile(json.encode(writings), writingsFile, writingsFileExists);
+        writeToFile(json.encode(tags.toList()), tagsFile, tagsFileExists);
       }
     });
   }
@@ -183,14 +185,13 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
     Map writingMap = new Map();
     List<Writing> writingTemp = writings;
     for(String tag in tags.toList()){
-      List<Writing> writingTagList = new List();
+      List<Writing> writingTagList = [];
       for(Writing writing in writingTemp){
         if(writing.tags.contains(tag)) {
           writingTagList.add(writing);
         }
       }
       writingMap[tag] = writingTagList;
-
     }
     return writingMap;
   }
@@ -243,18 +244,14 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
 
   }
 
-  void updateTags(){
-    for(Writing writing in writings){
-      for(String tag in writing.tags){
-        if(!tags.contains(tag)){
-          tags.add(tag);
-        }
-      }
-    }
+
+  void update(){
+    importanceFolders = getImportanceFolders(writingImportanceMap, context);
+    writingImportanceMap = sortWritingsByImportance();
+    writingTagMap = sortWritingsByTag(tags.toList());
+    tagFolders = getTagFolders(writingTagMap, context, tags);
   }
-
-
-
+  
   @override
   Widget build(BuildContext context) {
     update();

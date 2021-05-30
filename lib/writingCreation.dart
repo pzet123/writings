@@ -13,9 +13,9 @@ class writingCreationScreen extends StatefulWidget {
 class _writingCreationScreenState extends State<writingCreationScreen> {
   @override
 
-  String importance = "Normal";
+  String importance = "Medium";
   HashSet tags;
-  Map tagCheckValues;
+  Map tagCheckValues = new Map();
 
   TextEditingController titleInputController = new TextEditingController();
   TextEditingController descriptionInputController = new TextEditingController();
@@ -40,7 +40,6 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
           ElevatedButton(
               onPressed: () {
                 setState(() {
-                  print(newTagController.text);
                   tags.add(newTagController.text);
                   tagCheckValues[newTagController.text] = false;
                   Navigator.pop(context);
@@ -53,19 +52,38 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
     });
   }
 
+  createNewInputAlertWindow(BuildContext context){
+    return showDialog(context: context, builder: (context){
+      return AlertDialog(
+        title: Text("Invalid Input"),
+        content: Text("One or more of the text fields have been left blank"),
+      );
+    });
+  }
+
+  void fillWritingInformation(Writing writing, ){
+    titleInputController.text = writing.title;
+    descriptionInputController.text = writing.description;
+    textInputController.text = writing.text;
+    importance = writing.importance;
+  }
+
 
 
   Widget build(BuildContext context) {
     Map writingsMap = ModalRoute.of(context).settings.arguments;
-    List<Writing> writings = writingsMap["writings"];
-    List<Writing> writingsToDisplay = writingsMap["writingsToDisplay"];
+    bool editingWriting = writingsMap["editingWriting"];
+    Writing writingToEdit = writingsMap["writingToEdit"];
     tags = writingsMap["tags"];
-    print(tags.toString());
     tagCheckValues = writingsMap["tagCheckValues"];
+    if(editingWriting && !validTextInput()){
+      fillWritingInformation(writingToEdit);
+    }
     return Scaffold(
       appBar: AppBar(
-        title: Text("Writing creation"),
+        title: editingWriting?Text("Writing Modification"):Text("Writing Creation"),
         backgroundColor: Colors.blueGrey[700],
+        centerTitle: true,
       ),
       body: Container(
         padding: EdgeInsets.all(5),
@@ -95,7 +113,7 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
               hint: Text("Importance"),
               icon: Icon(Icons.keyboard_arrow_down),
               value: importance,
-              items: ["Normal", "Medium", "High", "Red pill"].map((importanceValue) {
+              items: ["Blue Pill", "Medium", "High", "Red pill"].map((importanceValue) {
                   return DropdownMenuItem(
                       value: importanceValue,
                       child: Text(importanceValue,
@@ -147,19 +165,32 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Set selectedTags = new Set();
-          for(String key in tagCheckValues.keys){
-            if(tagCheckValues[key] == true){
-              selectedTags.add(key);
+          if (validTextInput()) {
+            Set selectedTags = new Set();
+            for (String key in tagCheckValues.keys) {
+              if (tagCheckValues[key] == true) {
+                selectedTags.add(key);
+              }
             }
+            Writing newWriting = new Writing(
+                titleInputController.text, descriptionInputController.text,
+                textInputController.text, DateTime.now(), importance,
+                selectedTags);
+            Navigator.pop(context, newWriting);
           }
-          Writing newWriting = new Writing(titleInputController.text, descriptionInputController.text, textInputController.text, DateTime.now(), importance, selectedTags);
-          Navigator.pop(context, newWriting);
+          else{
+            createNewInputAlertWindow(context);
+          }
         },
         child: Icon(Icons.double_arrow_sharp),
       ),
     );
   }
-}
 
-//TODO: Ensure empty writings cannot be created
+  bool validTextInput(){
+    if(titleInputController.text.length != 0 && descriptionInputController.text.length != 0 && textInputController.text.length != 0){
+      return true;
+    }
+    return false;
+  }
+}

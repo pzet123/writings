@@ -16,7 +16,7 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
   static const String highestImportance = "Red pill";
   static const String highImportance = "High";
   static const String mediumImportance = "Medium";
-  static const String lowImportance = "Normal";
+  static const String lowImportance = "Blue Pill";
 
   List<Writing> writingsToDisplay = [];
 
@@ -25,6 +25,9 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
   AnimationController _repeatingAnimationController;
   Animation _breathingAnimation;
   Animation _redpillColourShift;
+  
+  HashSet tags;
+  Map tagCheckValues = new Map();
 
 
 
@@ -71,11 +74,7 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
     Map writingsMap = ModalRoute.of(context).settings.arguments;
     writingsToDisplay = writingsMap["WritingsToDisplay"];
     List<Writing> writings = writingsMap["Writings"];
-    HashSet tags = writingsMap["tags"];
-    Map tagCheckValues = new Map();
-    for(String tag in tags){
-      tagCheckValues[tag] = false;
-    }
+    tags = writingsMap["tags"];
     return Scaffold(
       appBar: AppBar(
         title: AppBarTitle("Writings"),
@@ -94,7 +93,10 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, "/writingCreation", arguments: {"writings" : writings, "tags" : tags, "tagCheckValues" : tagCheckValues, "writingsToDisplay" : writingsToDisplay}).then((newWriting) => setState((){
+          for(String tag in tags){
+            tagCheckValues[tag] = false;
+          }
+          Navigator.pushNamed(context, "/writingCreation", arguments: {"tags" : tags, "tagCheckValues" : tagCheckValues, "editingWriting" : false}).then((newWriting) => setState((){
             if(newWriting != null) {
               writingsToDisplay.add(newWriting);
               writings.add(newWriting);
@@ -163,25 +165,49 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
     }
   }
 
+  Widget getWidgetTile(Writing writing, Color color){
+    return ListTile(
+        title: Text(
+          writing.title,
+          style: TextStyle(
+            fontSize: 20,
+          ),
+        ),
+        subtitle: Text(writing.description),
+        trailing: IconButton(
+          icon: Icon(Icons.edit),
+          onPressed: () {
+            for(String tag in tags){
+              if(writing.tags.contains(tag)) {
+                tagCheckValues[tag] = true;
+              }
+              else{
+                tagCheckValues[tag] = false;
+              }
+            }
+            Navigator.pushNamed(context, "/writingCreation", arguments: {"editingWriting" : true, "writingToEdit" : writing, "tags" : tags, "tagCheckValues" : tagCheckValues}).then((editedWriting) {
+              setState(() {
+                if(editedWriting != null) {
+                  int oldWritingIndexInWritingsToDisplay = writingsToDisplay.indexOf(writing);
+                  int oldWritingIndexInWritings = writings.indexOf(writing);
+                  writings[oldWritingIndexInWritings] = editedWriting;
+                  writingsToDisplay[oldWritingIndexInWritingsToDisplay] = editedWriting;
+                }
+              });
+            });
+          },
+        ),
+        tileColor: color,
+    );
+  }
+
   Widget getHighestImportanceContainer(Writing writing){
     return AnimatedBuilder(
       animation: _breathingAnimation,
       builder: (BuildContext context, _) {
         return Container(
           margin: EdgeInsets.all(8),
-          child: Card(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                child: Column(
-                  children: [
-                    Text(writing.title),
-                    Divider(thickness: 4, height: 8,),
-                    Text(writing.description),
-                  ],
-                ),
-              ),
-              color: _redpillColourShift.value
-          ),
+          child: getWidgetTile(writing, _redpillColourShift.value),
           decoration: BoxDecoration(
               boxShadow: [BoxShadow(
                 color: Colors.orange[600],
@@ -200,19 +226,7 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
       builder: (BuildContext context, _){
         return Container(
           margin: EdgeInsets.all(8),
-          child: Card(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                child: Column(
-                  children: [
-                    Text(writing.title),
-                    Divider(thickness: 4, height: 8,),
-                    Text(writing.description),
-                  ],
-                ),
-              ),
-              color: Color.fromARGB(255, 255,223,0)
-          ),
+          child: getWidgetTile(writing, Color.fromARGB(255, 255,223,0)),
           decoration: BoxDecoration(
               boxShadow: [BoxShadow(
                 color: Color.fromARGB(100, 255, 212, 0),
@@ -228,38 +242,14 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
   Widget getMediumImportanceContainer(Writing writing){
     return Container(
       margin: EdgeInsets.all(8),
-      child: Card(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-            child: Column(
-              children: [
-                Text(writing.title),
-                Divider(thickness: 4, height: 8,),
-                Text(writing.description),
-              ],
-            ),
-          ),
-          color: Colors.indigo[500]
-      ),
+      child: getWidgetTile(writing, Colors.indigo[500])
     );
   }
 
   Widget getLowImportanceContainer(Writing writing){
     return Container(
       margin: EdgeInsets.all(8),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-          child: Column(
-            children: [
-              Text(writing.title),
-              Divider(thickness: 4, height: 8,),
-              Text(writing.description),
-            ],
-          ),
-        ),
-        color: Colors.grey[600],
-      ),
+      child: getWidgetTile(writing, Colors.blue[600])
     );
   }
 
