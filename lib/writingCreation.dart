@@ -183,6 +183,7 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
           }
         },
         child: Icon(Icons.double_arrow_sharp),
+        backgroundColor: Colors.blueGrey[700],
       ),
     );
   }

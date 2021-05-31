@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:writings/Writing.dart';
+import 'package:writings/helpEntryScreen.dart';
 import 'package:writings/homeScreen.dart';
 import 'writingScreen.dart';
 import 'package:writings/writingCreation.dart';
@@ -15,6 +16,7 @@ void main() => runApp(new MaterialApp(
           "/writingCreation" : (context) => writingCreationScreen(),
           "/writingViewing" : (context) => writingViewing(),
           "/helpScreen" : (context) => helpScreen(),
+          "/helpEntryScreen" : (context) => helpEntryScreen(),
   },
 ));
 
