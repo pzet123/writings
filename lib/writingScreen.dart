@@ -1,8 +1,10 @@
 import 'dart:collection';
 
+import 'package:Pilled/StateWidget.dart';
 import 'package:flutter/material.dart';
-import 'package:writings/Writing.dart';
-import 'package:writings/homeScreen.dart';
+import 'package:flutter/services.dart';
+import "Writing.dart";
+import "homeScreen.dart";
 import 'appBarTitle.dart';
 
 
@@ -13,10 +15,10 @@ class writingScreen extends StatefulWidget {
 
 class _writingScreenState extends State<writingScreen> with TickerProviderStateMixin {
 
-  static const String highestImportance = "Red pill";
-  static const String highImportance = "High";
-  static const String mediumImportance = "Medium";
-  static const String lowImportance = "Blue Pill";
+  static const String redPillString = "Red pill";
+  static const String whitePillString = "White Pill";
+  static const String blackPillString = "Black Pill";
+  static const String bluePillString = "Blue Pill";
 
   List<Writing> writingsToDisplay = [];
 
@@ -25,8 +27,7 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
   AnimationController _repeatingAnimationController;
   Animation _breathingAnimation;
   Animation _redpillColourShift;
-  
-  HashSet tags;
+
   Map tagCheckValues = new Map();
 
 
@@ -41,7 +42,7 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
       vsync: this,
     );
     _breathingAnimation = Tween(begin: 0.0, end: 4.0).animate(_repeatingAnimationController);
-    _redpillColourShift = ColorTween(begin: Colors.orange[600], end: Color.fromARGB(100, 255, 33, 38)).animate(_repeatingAnimationController);
+    _redpillColourShift = ColorTween(begin: Colors.orange[600], end: Color.fromARGB(150, 255, 33, 38)).animate(_repeatingAnimationController);
 
     _repeatingAnimationController.forward();
 
@@ -71,13 +72,14 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final provider = StateInheritedWidget.of(context);
     Map writingsMap = ModalRoute.of(context).settings.arguments;
     writingsToDisplay = writingsMap["WritingsToDisplay"];
-    List<Writing> writings = writingsMap["Writings"];
-    tags = writingsMap["tags"];
+    String selectedTag = writingsMap["currentTag"] ?? "";
+    String selectedImportance = writingsMap["currentImportance"];
     return Scaffold(
       appBar: AppBar(
-        title: AppBarTitle("Writings"),
+        title: AppBarTitle("Pills"),
         backgroundColor: Colors.blueGrey[700],
         centerTitle: true,
       ),
@@ -93,13 +95,14 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          for(String tag in tags){
-            tagCheckValues[tag] = false;
+          for(String tag in provider.state.tags){
+            if(tag == selectedTag) tagCheckValues[tag] = true;
+            else tagCheckValues[tag] = false;
           }
-          Navigator.pushNamed(context, "/writingCreation", arguments: {"tags" : tags, "tagCheckValues" : tagCheckValues, "editingWriting" : false}).then((newWriting) => setState((){
+          Navigator.pushNamed(context, "/writingCreation", arguments: {"tagCheckValues" : tagCheckValues, "editingWriting" : false, "currentImportance" : selectedImportance}).then((newWriting) => setState((){
             if(newWriting != null) {
               writingsToDisplay.add(newWriting);
-              writings.add(newWriting);
+              provider.addWriting(newWriting);
               _animatedListKey.currentState.insertItem(writingsToDisplay.length - 1);
             }
           }));
@@ -124,6 +127,7 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
   }
 
   Widget generateWritingWidget(Writing writing, List<Writing> writingsToDisplay){
+    final provider = StateInheritedWidget.of(context);
     return GestureDetector(
       child: decideContainer(writing),
       onTap: () {
@@ -139,10 +143,8 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
                     ));
         setState(() {
            writingsToDisplay.remove(writing);
-           writings.remove(writing);         
+           provider.removeWriting(writing);
         });
-        writingsToDisplay.remove(writing);
-        writings.remove(writing);
       },
     );
   }
@@ -150,22 +152,23 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
 
   Widget decideContainer(Writing writing){
     switch(writing.importance){
-      case highestImportance: {
-        return getHighestImportanceContainer(writing);
+      case redPillString: {
+        return getRedPillContainer(writing);
       } break;
-      case highImportance: {
-        return getHighImportanceContainer(writing);
+      case whitePillString: {
+        return getWhitePillContainer(writing);
       } break;
-      case mediumImportance: {
-        return getMediumImportanceContainer(writing);
+      case blackPillString: {
+        return getBlackPillContainer(writing);
       } break;
-      case lowImportance: {
-        return getLowImportanceContainer(writing);
+      case bluePillString: {
+        return getBluePillContainer(writing);
       } break;
     }
   }
 
   Widget getWidgetTile(Writing writing, Color color){
+    final provider = StateInheritedWidget.of(context);
     return ListTile(
         title: Text(
           writing.title,
@@ -177,7 +180,7 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
         trailing: IconButton(
           icon: Icon(Icons.edit),
           onPressed: () {
-            for(String tag in tags){
+            for(String tag in provider.state.tags){
               if(writing.tags.contains(tag)) {
                 tagCheckValues[tag] = true;
               }
@@ -185,13 +188,12 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
                 tagCheckValues[tag] = false;
               }
             }
-            Navigator.pushNamed(context, "/writingCreation", arguments: {"editingWriting" : true, "writingToEdit" : writing, "tags" : tags, "tagCheckValues" : tagCheckValues}).then((editedWriting) {
+            Navigator.pushNamed(context, "/writingCreation", arguments: {"editingWriting" : true, "writingToEdit" : writing, "tagCheckValues" : tagCheckValues}).then((editedWriting) {
               setState(() {
                 if(editedWriting != null) {
                   int oldWritingIndexInWritingsToDisplay = writingsToDisplay.indexOf(writing);
-                  int oldWritingIndexInWritings = writings.indexOf(writing);
-                  writings[oldWritingIndexInWritings] = editedWriting;
                   writingsToDisplay[oldWritingIndexInWritingsToDisplay] = editedWriting;
+                  provider.editWriting(writing, editedWriting);
                 }
               });
             });
@@ -201,7 +203,7 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
     );
   }
 
-  Widget getHighestImportanceContainer(Writing writing){
+  Widget getRedPillContainer(Writing writing){
     return AnimatedBuilder(
       animation: _breathingAnimation,
       builder: (BuildContext context, _) {
@@ -211,8 +213,8 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
           decoration: BoxDecoration(
               boxShadow: [BoxShadow(
                 color: Colors.orange[600],
-                blurRadius: _breathingAnimation.value*2,
-                spreadRadius: _breathingAnimation.value,
+                blurRadius: _breathingAnimation.value * 2,
+                spreadRadius: _breathingAnimation.value * 2,
               )]
           ),
         );
@@ -220,18 +222,18 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
     );
   }
 
-  Widget getHighImportanceContainer(Writing writing){
+  Widget getWhitePillContainer(Writing writing){
     return AnimatedBuilder(
       animation: _breathingAnimation,
       builder: (BuildContext context, _){
         return Container(
           margin: EdgeInsets.all(8),
-          child: getWidgetTile(writing, Color.fromARGB(255, 255,223,0)),
+          child: getWidgetTile(writing, Colors.white),
           decoration: BoxDecoration(
               boxShadow: [BoxShadow(
-                color: Color.fromARGB(100, 255, 212, 0),
-                blurRadius: _breathingAnimation.value * 2,
-                spreadRadius: _breathingAnimation.value,
+                color: Colors.white54,
+                blurRadius: _breathingAnimation.value * 1.5,
+                spreadRadius: _breathingAnimation.value * 1.5,
               )]
           ),
         );
@@ -239,17 +241,17 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
     );
   }
 
-  Widget getMediumImportanceContainer(Writing writing){
+  Widget getBlackPillContainer(Writing writing){
     return Container(
       margin: EdgeInsets.all(8),
-      child: getWidgetTile(writing, Colors.indigo[500])
+      child: getWidgetTile(writing, Colors.grey[700])
     );
   }
 
-  Widget getLowImportanceContainer(Writing writing){
+  Widget getBluePillContainer(Writing writing){
     return Container(
       margin: EdgeInsets.all(8),
-      child: getWidgetTile(writing, Colors.blue[600])
+      child: getWidgetTile(writing,  Color.fromARGB(255, 47, 38, 173))
     );
   }
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:writings/Writing.dart';
-
+import "Writing.dart";
+import 'StateWidget.dart';
 class writingViewing extends StatefulWidget {
   @override
   _writingViewingState createState() => _writingViewingState();
@@ -9,6 +9,7 @@ class writingViewing extends StatefulWidget {
 class _writingViewingState extends State<writingViewing> {
   @override
   Widget build(BuildContext context) {
+    double fontSize = StateInheritedWidget.of(context).state.fontSize * 0.75;
     Writing writing = ModalRoute.of(context).settings.arguments;
     return Scaffold(
       appBar: AppBar(
@@ -58,13 +59,9 @@ class _writingViewingState extends State<writingViewing> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Center(child:
-                  Text("Importace level: " + writing.importance,
-                  style: TextStyle(fontSize: 18),)),
-                  Divider(thickness: 2, color: Colors.white,),
-                  Center(child:
-                  Text(writing.dateOfWriting.toString().substring(0, 16),
-                      style: TextStyle(fontSize: 18))),
+                  _writingMetaDataWidget("Importance " + writing.importance, fontSize),
+                  _writingMetaDataWidget("Tags: " + ((writing.tags.length > 0) ? writing.getTagsString(): "None"), fontSize),
+                  _writingMetaDataWidget(writing.dateOfWriting.toString().substring(0, 16), fontSize)
                 ],
               ),
             ),
@@ -73,4 +70,27 @@ class _writingViewingState extends State<writingViewing> {
       )
     );
   }
+
+
+
+}
+
+class _writingMetaDataWidget extends StatelessWidget{
+  final String text;
+  final double fontSize;
+
+  const _writingMetaDataWidget(this.text, this.fontSize);
+
+  @override
+  Widget build(BuildContext context){
+    return Column(
+      children: [
+        Center(child:
+        Text(this.text,
+          style: TextStyle(fontSize: fontSize),)),
+        Divider(thickness: 2, color: Colors.white,),
+      ],
+    );
+  }
+
 }

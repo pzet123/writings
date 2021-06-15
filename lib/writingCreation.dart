@@ -3,7 +3,8 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:writings/Writing.dart';
+import 'StateWidget.dart';
+import "Writing.dart";
 
 class writingCreationScreen extends StatefulWidget {
   @override
@@ -13,8 +14,7 @@ class writingCreationScreen extends StatefulWidget {
 class _writingCreationScreenState extends State<writingCreationScreen> {
   @override
 
-  String importance = "Medium";
-  HashSet tags;
+  String importance;
   Map tagCheckValues = new Map();
 
   TextEditingController titleInputController = new TextEditingController();
@@ -32,6 +32,7 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
   }
 
   createNewTagWindow(BuildContext context){
+    final provider = StateInheritedWidget.of(context);
     return showDialog(context: context, builder: (context) {
       return AlertDialog(
         title: Text("New tag"),
@@ -40,8 +41,8 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
           ElevatedButton(
               onPressed: () {
                 setState(() {
-                  tags.add(newTagController.text);
-                  tagCheckValues[newTagController.text] = false;
+                  provider.addTag(newTagController.text);
+                  tagCheckValues[newTagController.text] = true;
                   Navigator.pop(context);
                 });
       },
@@ -61,7 +62,7 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
     });
   }
 
-  void fillWritingInformation(Writing writing, ){
+  void fillWritingInformation(Writing writing){
     titleInputController.text = writing.title;
     descriptionInputController.text = writing.description;
     textInputController.text = writing.text;
@@ -71,15 +72,17 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
 
 
   Widget build(BuildContext context) {
+    final provider = StateInheritedWidget.of(context);
     Map writingsMap = ModalRoute.of(context).settings.arguments;
     bool editingWriting = writingsMap["editingWriting"];
     Writing writingToEdit = writingsMap["writingToEdit"];
-    tags = writingsMap["tags"];
     tagCheckValues = writingsMap["tagCheckValues"];
+    importance = writingsMap["currentImportance"] ?? "White Pill";
     if(editingWriting && !validTextInput()){
       fillWritingInformation(writingToEdit);
     }
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: editingWriting?Text("Writing Modification"):Text("Writing Creation"),
         backgroundColor: Colors.blueGrey[700],
@@ -91,29 +94,14 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField( //TODO: Limit input size on each of the text boxes.
-              controller: titleInputController,
-              decoration: InputDecoration(
-                labelText: "Title"
-              ),
-            ),
-            TextField(
-              controller: descriptionInputController,
-              decoration: InputDecoration(
-                labelText: "Description"
-              ),
-            ),
-            TextField(
-              controller: textInputController,
-              decoration: InputDecoration(
-                labelText: "Text"
-              ),
-            ),
+            _InputTextBox(titleInputController, "Title", charLimit: 40),
+            _InputTextBox(descriptionInputController, "Description", charLimit: 100),
+            _InputTextBox(textInputController, "Text"),
             DropdownButton(
               hint: Text("Importance"),
               icon: Icon(Icons.keyboard_arrow_down),
               value: importance,
-              items: ["Blue Pill", "Medium", "High", "Red pill"].map((importanceValue) {
+              items: ["Blue Pill", "Black Pill", "White Pill", "Red pill"].map((importanceValue) {
                   return DropdownMenuItem(
                       value: importanceValue,
                       child: Text(importanceValue,
@@ -133,7 +121,7 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
             ),
             Expanded(
               child: ListView(
-                children: tags.map((tag) {
+                children: provider.state.tags.map((tag) {
                   return CheckboxListTile(
                       value: tagCheckValues[tag],
                       onChanged: (newValue) {
@@ -193,5 +181,25 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
       return true;
     }
     return false;
+  }
+}
+
+class _InputTextBox extends StatelessWidget {
+
+  final int charLimit;
+  final TextEditingController controller;
+  final String label;
+
+  const _InputTextBox(this.controller, this.label, {this.charLimit});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+          labelText: label
+      ),
+      maxLength: charLimit,
+    );
   }
 }

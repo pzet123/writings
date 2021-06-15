@@ -20,6 +20,14 @@ class Writing{
     this._tags = tags;
   }
 
+  String getTagsString(){
+    String tagsString = "";
+    for(String tag in tags){
+      tagsString += tag + ", ";
+    }
+    return tagsString;
+  }
+
   Writing.fromJson(Map<String, dynamic> json) :
     this._title = json["title"],
     this._description = json["description"],
@@ -38,7 +46,6 @@ class Writing{
   };
 
   static String debugmeth(text){
-    print("FROM JSON CALLED");
     return text;
   }
 

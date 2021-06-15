@@ -1,5 +1,5 @@
-name: writings
-description: An app which allows you to write and clear your head while storing your writings for future reference
+name: Pilled
+description: An app which allows you to record different types of "pills" you come across.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -25,6 +25,8 @@ dependencies:
     sdk: flutter
   path_provider: ^2.0.1
   json_serializable: ^4.1.2
+  flutter_launcher_icons: ^0.9.0
+
 
 
 
@@ -40,6 +42,11 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/pilledlogodownsized.png"
 
 
 # For information on the generic Dart part of this file, see the

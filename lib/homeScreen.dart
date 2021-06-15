@@ -5,21 +5,20 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:writings/Writing.dart';
+import 'package:flutter/services.dart';
+import "Writing.dart";
 import 'appBarTitle.dart';
 import 'package:path_provider/path_provider.dart';
+import 'StateWidget.dart';
 
 
-const String highestImportance = "Red pill";
-const String highImportance = "High";
-const String mediumImportance = "Medium";
-const String lowImportance = "Blue Pill";
-const List folderImportanceAttributes = [[highestImportance, Colors.red], [highImportance, Color.fromARGB(255, 255,223,0)],
-  [mediumImportance, Color.fromARGB(255, 240, 240, 240)], [lowImportance, Colors.blue]];
+const String redPillString = "Red pill";
+const String whitePillString = "White Pill";
+const String blackPillString = "Black Pill";
+const String bluePillString = "Blue Pill";
+const List folderImportanceAttributes = [[redPillString, Colors.red], [whitePillString, Colors.white],
+  [blackPillString, Color.fromARGB(255, 70, 70, 70)], [bluePillString, Color.fromARGB(255, 47, 38, 173)]];
 
-
-
-List<Writing> writings = [];
 
 
 class homeScreen extends StatefulWidget {
@@ -32,7 +31,6 @@ class homeScreen extends StatefulWidget {
 class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
   AppLifecycleState _lastLifecycleState;
 
-  HashSet tags = new HashSet<String>();
 
   Map writingImportanceMap;
   Map writingTagMap;
@@ -51,6 +49,9 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
   String tagsFileName = "tags";
   bool tagsFileExists;
 
+  double fontSize;
+
+
 
   File createFile(String jsonString, File file, bool fileExists){
     file.createSync();
@@ -64,12 +65,23 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
     }
     else createFile(jsonString, file, fileExists);
   }
-  
+
+  void setFontSize() {
+    final provider = StateInheritedWidget.of(context);
+    double screenWidth = MediaQuery.of(context).size.height;
+    provider.setFontSize(screenWidth * 0.033);
+
+  }
 
   @override
   void initState(){
     super.initState();
+    Future(() => setFontSize());
+
     getApplicationDocumentsDirectory().then((Directory directory) {
+      final provider = StateInheritedWidget.of(context);
+
+
       hostFileDirectory = directory;
       writingsFile = new File(hostFileDirectory.path + "/" + writingsFileName);
       tagsFile = new File(hostFileDirectory.path + "/" + tagsFileName);
@@ -78,15 +90,15 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
       if(writingsFileExists) setState(() {
         List<dynamic> decodedJSON = json.decode(writingsFile.readAsStringSync());
         for(dynamic item in decodedJSON){
-          writings.add(Writing.fromJson(item));
+          provider.addWriting(Writing.fromJson(item));
         }
-        //updateTags();
       });
       if(tagsFileExists) setState(() {
         List<dynamic> decodedJSON = json.decode(tagsFile.readAsStringSync());
         for(dynamic item in decodedJSON){
-          tags.add(item);
+          provider.addTag(item);
         }
+
       });
     });
     WidgetsBinding.instance.addObserver(this);
@@ -100,6 +112,9 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state){
+    final provider = StateInheritedWidget.of(context);
+    final writings = provider.state.writings;
+    final tags = provider.state.tags;
     setState(() {
       _lastLifecycleState = state;
       if(_lastLifecycleState == AppLifecycleState.inactive){
@@ -110,11 +125,11 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
   }
 
 
-  void displayWritings(List writingsToDisplay){
+  void displayWritings(List writingsToDisplay, {String importance, String tag}){
     Navigator.pushNamed(context, "/writingScreen", arguments: {
       "WritingsToDisplay": writingsToDisplay,
-      "Writings": writings,
-      "tags": tags
+      "currentTag" : tag,
+      "currentImportance" : importance
     }).then((value) {
       setState(() {
         update();
@@ -122,34 +137,71 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
     });
   }
 
-  List<Widget> getTagFolders(Map writingTagMap, BuildContext context, HashSet tags){
+  List<Widget> getTagFolders(Map writingTagMap, BuildContext context, Set tags){
     List<Widget> tagFolderCards = tags.map((tag) {
       return GestureDetector(
         child: getFolderCard(tag, Colors.blueGrey[300]),
         onTap: (){
-          displayWritings(writingTagMap[tag]);
+          displayWritings(writingTagMap[tag], tag: tag);
         },
         onLongPress: () {
-          setState(() {
-            tags.remove(tag);
-            removeTagWritings(tag);
-          });
-
+          showConfirmationWindow(context, tag);
         },
       );
     }).toList();
     return tagFolderCards;
   }
 
+  void showConfirmationWindow(BuildContext, String tag){
+    showDialog(context: context, builder: (context) {
+      final provider = StateInheritedWidget.of(context);
+      return AlertDialog(
+        title: Text("Are you sure you want to delete this tag?"),
+        content: Row(
+          children: [
+            ElevatedButton(onPressed: () {
+              setState(() {
+                provider.removeTag(tag);
+                removeTagWritings(tag);
+                Navigator.pop(context);
+              });
+            }, child: Text("Yes"),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.blueGrey[700]),
+              ),
+            ),
+            Spacer(),
+            ElevatedButton(onPressed: () {
+              Navigator.pop(context);
+            }, child: Text("No"),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.blueGrey[700]),
+              ),
+            )
+          ],
+        ),
+      );
+    });
+  }
   void removeTagWritings(String tag){
+    final provider = StateInheritedWidget.of(context);
+    final writings = provider.state.writings;
     for(Writing writing in List.unmodifiable(writings)){
       if(writing.tags.contains(tag)){
-        writings.remove(writing);
+        writing.tags.remove(tag);
+        if(writing.tags.length == 0) {
+          setState(() {
+            provider.removeWriting(writing);
+            update();
+          });
+        }
       }
     }
   }
 
   Map sortWritingsByImportance(){
+    final provider = StateInheritedWidget.of(context);
+    final writings = provider.state.writings;
     Map writingMap = new Map();
     List<Writing> redPillWritings = [];
     List<Writing> highImportanceWritings = [];
@@ -157,31 +209,33 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
     List<Writing> lowImportanceWritings = [];
     for(Writing writing in writings){
       switch(writing.importance){
-        case highestImportance: {
+        case redPillString: {
           redPillWritings.add(writing);
         } break;
-        case highImportance: {
+        case whitePillString: {
           highImportanceWritings.add(writing);
         } break;
-        case mediumImportance: {
+        case blackPillString: {
           mediumImportanceWritings.add(writing);
         } break;
-        case lowImportance: {
+        case bluePillString: {
           lowImportanceWritings.add(writing);
         } break;
       }
     }
     writingMap = {
-      highestImportance : redPillWritings,
-      highImportance : highImportanceWritings,
-      mediumImportance : mediumImportanceWritings,
-      lowImportance : lowImportanceWritings,
+      redPillString : redPillWritings,
+      whitePillString : highImportanceWritings,
+      blackPillString : mediumImportanceWritings,
+      bluePillString : lowImportanceWritings,
     };
     return writingMap;
   }
 
 
   Map sortWritingsByTag(List<String> tags){
+    final provider = StateInheritedWidget.of(context);
+    final writings = provider.state.writings;
     Map writingMap = new Map();
     List<Writing> writingTemp = writings;
     for(String tag in tags.toList()){
@@ -198,10 +252,12 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
 
   List<Widget> getImportanceFolders(Map writingImportanceMap, BuildContext context){
     List<Widget> importanceFolderCards = folderImportanceAttributes.map((importanceAttributes) {
+      String importanceName = importanceAttributes[0];
+      Color importanceColor = importanceAttributes[1];
       return GestureDetector(
-        child: getFolderCard(importanceAttributes[0], importanceAttributes[1]),
+        child: getFolderCard(importanceName, importanceColor),
         onTap: () {
-          displayWritings(writingImportanceMap[importanceAttributes[0]]);
+          displayWritings(writingImportanceMap[importanceName], importance: importanceName);
         },
       );
     }).toList();
@@ -212,11 +268,11 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
     return Card(
       color: color,
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.all(fontSize),
         child: Center(
           child: Text(title,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: fontSize,
               )),
         ),
       ),
@@ -246,14 +302,26 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
 
 
   void update(){
+    final provider = StateInheritedWidget.of(context);
+    Set tags = provider.state.tags;
     importanceFolders = getImportanceFolders(writingImportanceMap, context);
     writingImportanceMap = sortWritingsByImportance();
-    writingTagMap = sortWritingsByTag(tags.toList());
+    writingTagMap = sortWritingsByTag(new List<String>.from(tags));
     tagFolders = getTagFolders(writingTagMap, context, tags);
   }
   
   @override
   Widget build(BuildContext context) {
+    final provider = StateInheritedWidget.of(context);
+    final writings = provider.state.writings;
+
+    double screenWidth = MediaQuery.of(context).size.height;
+    fontSize = screenWidth * 0.033;
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+
     update();
     return Scaffold(
       appBar: AppBar(
@@ -292,7 +360,7 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
                 child: getFolderWidget(importanceFolders)),
             Divider(thickness: 3, height: 10, color: Colors.white,),
             Expanded(
-              flex: 11,
+              flex: 7,
               child: ListView(
                 children: [
                   getFolderWidget(tagFolders)
@@ -318,18 +386,3 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
