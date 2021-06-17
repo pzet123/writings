@@ -15,7 +15,7 @@ class writingScreen extends StatefulWidget {
 
 class _writingScreenState extends State<writingScreen> with TickerProviderStateMixin {
 
-  static const String redPillString = "Red pill";
+  static const String redPillString = "Red Pill";
   static const String whitePillString = "White Pill";
   static const String blackPillString = "Black Pill";
   static const String bluePillString = "Blue Pill";
@@ -29,8 +29,6 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
   Animation _redpillColourShift;
 
   Map tagCheckValues = new Map();
-
-
 
 
   @override

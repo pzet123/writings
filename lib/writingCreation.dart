@@ -16,6 +16,9 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
 
   String importance;
   Map tagCheckValues = new Map();
+  bool editingWriting;
+  Writing writingToEdit;
+  bool importanceSet = false;
 
   TextEditingController titleInputController = new TextEditingController();
   TextEditingController descriptionInputController = new TextEditingController();
@@ -30,6 +33,8 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
     newTagController.dispose();
     super.dispose();
   }
+
+
 
   createNewTagWindow(BuildContext context){
     final provider = StateInheritedWidget.of(context);
@@ -74,10 +79,14 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
   Widget build(BuildContext context) {
     final provider = StateInheritedWidget.of(context);
     Map writingsMap = ModalRoute.of(context).settings.arguments;
-    bool editingWriting = writingsMap["editingWriting"];
-    Writing writingToEdit = writingsMap["writingToEdit"];
+    editingWriting = writingsMap["editingWriting"];
+    writingToEdit = writingsMap["writingToEdit"];
     tagCheckValues = writingsMap["tagCheckValues"];
-    importance = writingsMap["currentImportance"] ?? "White Pill";
+    if(!importanceSet) {
+      importance = writingsMap["currentImportance"] ?? "White Pill";
+      importanceSet = true;
+    }
+
     if(editingWriting && !validTextInput()){
       fillWritingInformation(writingToEdit);
     }
@@ -101,7 +110,7 @@ class _writingCreationScreenState extends State<writingCreationScreen> {
               hint: Text("Importance"),
               icon: Icon(Icons.keyboard_arrow_down),
               value: importance,
-              items: ["Blue Pill", "Black Pill", "White Pill", "Red pill"].map((importanceValue) {
+              items: ["Blue Pill", "Black Pill", "White Pill", "Red Pill"].map((importanceValue) {
                   return DropdownMenuItem(
                       value: importanceValue,
                       child: Text(importanceValue,

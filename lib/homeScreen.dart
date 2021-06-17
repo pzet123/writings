@@ -12,7 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'StateWidget.dart';
 
 
-const String redPillString = "Red pill";
+const String redPillString = "Red Pill";
 const String whitePillString = "White Pill";
 const String blackPillString = "Black Pill";
 const String bluePillString = "Blue Pill";
@@ -341,7 +341,7 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
                 gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                stops: [0.1, 0.5, 0.7, 0.95],
+                stops: [0.1, 0.4, 0.6, 0.8],
                 colors: [
                 Colors.blueGrey[700],
                 Colors.blueGrey[500],

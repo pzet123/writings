@@ -9,16 +9,22 @@ class helpScreen extends StatelessWidget {
       appBar: AppBar(
         title: AppBarTitle("Guide"),
         centerTitle: true,
-        backgroundColor: Colors.blueGrey[600],
+        backgroundColor: Colors.blueGrey[700],
       ),
       body: Container(
         padding: EdgeInsets.all(5),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            stops: [0.2, 0.4, 0.6, 0.8],
-            colors: [Colors.blueGrey[400], Colors.blueGrey[300], Colors.blueGrey[200], Colors.blueGrey[100]],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+              stops: [0.1, 0.4, 0.6, 0.8],
+              colors: [
+                Colors.blueGrey[700],
+                Colors.blueGrey[500],
+                Colors.blueGrey[400],
+                Colors.blueGrey[300]
+              ]
+
           )
         ),
         child: ListView(

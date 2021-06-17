@@ -25,7 +25,6 @@ class helpEntryScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 20,
                       wordSpacing: 1.2,
-                      color: Colors.grey[850]
                     ),
                 ),
                 SizedBox(height: 10,)
@@ -37,8 +36,8 @@ class helpEntryScreen extends StatelessWidget {
           gradient: LinearGradient(
             stops: [0.5, 1],
             colors: [Colors.blueGrey[300], Colors.blueGrey[100]],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           )
         ),
       ),
