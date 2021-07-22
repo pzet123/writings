@@ -59,7 +59,7 @@ class _writingViewingState extends State<writingViewing> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _writingMetaDataWidget("Importance " + writing.importance, fontSize),
+                  _writingMetaDataWidget("Importance: " + writing.importance, fontSize),
                   _writingMetaDataWidget("Tags: " + ((writing.tags.length > 0) ? writing.getTagsString(): "None"), fontSize),
                   _writingMetaDataWidget(writing.dateOfWriting.toString().substring(0, 16), fontSize)
                 ],

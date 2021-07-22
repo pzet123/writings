@@ -17,7 +17,7 @@ const String whitePillString = "White Pill";
 const String blackPillString = "Black Pill";
 const String bluePillString = "Blue Pill";
 const List folderImportanceAttributes = [[redPillString, Colors.red], [whitePillString, Colors.white],
-  [blackPillString, Color.fromARGB(255, 70, 70, 70)], [bluePillString, Color.fromARGB(255, 47, 38, 173)]];
+  [blackPillString, Color.fromARGB(255, 70, 70, 70)], [bluePillString, Color.fromARGB(255, 50, 51, 224)]];
 
 
 
@@ -140,7 +140,7 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
   List<Widget> getTagFolders(Map writingTagMap, BuildContext context, Set tags){
     List<Widget> tagFolderCards = tags.map((tag) {
       return GestureDetector(
-        child: getFolderCard(tag, Colors.blueGrey[300]),
+        child: getFolderCard(tag, Colors.blueGrey[300], true),
         onTap: (){
           displayWritings(writingTagMap[tag], tag: tag);
         },
@@ -255,7 +255,7 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
       String importanceName = importanceAttributes[0];
       Color importanceColor = importanceAttributes[1];
       return GestureDetector(
-        child: getFolderCard(importanceName, importanceColor),
+        child: getFolderCard(importanceName, importanceColor, false),
         onTap: () {
           displayWritings(writingImportanceMap[importanceName], importance: importanceName);
         },
@@ -264,7 +264,7 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
     return importanceFolderCards;
   }
 
-  Widget getFolderCard(String title, Color color){
+  Widget getFolderCard(String title, Color color, bool folderCard){
     return Card(
       color: color,
       child: Padding(
@@ -272,7 +272,7 @@ class _homeScreenState extends State<homeScreen> with WidgetsBindingObserver{
         child: Center(
           child: Text(title,
               style: TextStyle(
-                fontSize: fontSize,
+                fontSize: (folderCard) ? fontSize * 0.8 : fontSize,
               )),
         ),
       ),

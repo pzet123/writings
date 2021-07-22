@@ -249,7 +249,7 @@ class _writingScreenState extends State<writingScreen> with TickerProviderStateM
   Widget getBluePillContainer(Writing writing){
     return Container(
       margin: EdgeInsets.all(8),
-      child: getWidgetTile(writing,  Color.fromARGB(255, 47, 38, 173))
+      child: getWidgetTile(writing, Color.fromARGB(255, 50, 51, 224))
     );
   }
 
